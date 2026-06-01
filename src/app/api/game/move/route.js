@@ -1,5 +1,5 @@
-import { getRoom, updateRoom } from "../../../../lib/serverStore";
-import { triggerEvent } from "../../../../lib/pusher";
+import { getRoom, updateRoom, createRoom } from "../../../../lib/serverStore";
+import { triggerEvent, getChannelInfo } from "../../../../lib/pusher";
 
 export async function POST(request) {
   try {
@@ -24,13 +24,22 @@ export async function POST(request) {
 
     const roomId = rawRoomId.trim().toUpperCase();
 
-    // 1. Validate that the room exists
-    const room = getRoom(roomId);
+    // 1. Validate that the room exists (with serverless self-healing)
+    let room = getRoom(roomId);
     if (!room) {
-      return Response.json(
-        { error: `Room '${roomId}' not found` },
-        { status: 404 }
-      );
+      const channelName = `presence-room-${roomId}`;
+      const channelInfo = await getChannelInfo(channelName);
+      
+      if (channelInfo.occupied && channelInfo.user_count > 0) {
+        // Re-hydrate the room dynamically in local container memory
+        room = createRoom(roomId, "HOST_ID_REHYDRATED", "Host Player", true);
+        room.status = "playing"; // Mark as playing to accept the move
+      } else {
+        return Response.json(
+          { error: `Room '${roomId}' not found` },
+          { status: 404 }
+        );
+      }
     }
 
     // 2. Validate that the room is actively being played

@@ -1,5 +1,5 @@
-import { getRoom, joinRoom } from "../../../../lib/serverStore";
-import { triggerEvent } from "../../../../lib/pusher";
+import { getRoom, joinRoom, createRoom } from "../../../../lib/serverStore";
+import { triggerEvent, getChannelInfo } from "../../../../lib/pusher";
 
 export async function POST(request) {
   try {
@@ -24,13 +24,21 @@ export async function POST(request) {
 
     const roomId = rawRoomId.trim().toUpperCase();
 
-    // 1. Validate that the room exists
-    const room = getRoom(roomId);
+    // 1. Validate that the room exists (with serverless self-healing)
+    let room = getRoom(roomId);
     if (!room) {
-      return Response.json(
-        { error: `Room '${roomId}' not found` },
-        { status: 404 }
-      );
+      const channelName = `presence-room-${roomId}`;
+      const channelInfo = await getChannelInfo(channelName);
+      
+      if (channelInfo.occupied && channelInfo.user_count > 0) {
+        // Re-hydrate the room structure dynamically inside Vercel's ephemeral memory
+        room = createRoom(roomId, "HOST_ID_REHYDRATED", "Host Player", true);
+      } else {
+        return Response.json(
+          { error: `Room '${roomId}' not found or Host has disconnected. Please verify the code.` },
+          { status: 404 }
+        );
+      }
     }
 
     // 2. Validate room capacity and status before joining

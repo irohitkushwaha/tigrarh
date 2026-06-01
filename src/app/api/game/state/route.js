@@ -1,4 +1,5 @@
-import { getRoom } from "../../../../lib/serverStore";
+import { getRoom, createRoom } from "../../../../lib/serverStore";
+import { getChannelInfo } from "../../../../lib/pusher";
 
 export async function GET(request) {
   try {
@@ -14,14 +15,25 @@ export async function GET(request) {
 
     const roomId = rawRoomId.trim().toUpperCase();
 
-    // 1. Look up the room in our global server store
-    const room = getRoom(roomId);
+    // 1. Look up the room in our global server store (with serverless self-healing)
+    let room = getRoom(roomId);
 
     if (!room) {
-      return Response.json(
-        { error: `Room '${roomId}' not found or has been deleted` },
-        { status: 404 }
-      );
+      const channelName = `presence-room-${roomId}`;
+      const channelInfo = await getChannelInfo(channelName);
+      
+      if (channelInfo.occupied && channelInfo.user_count > 0) {
+        // Re-hydrate the room structure in ephemeral memory
+        room = createRoom(roomId, "HOST_ID_REHYDRATED", "Host Player", true);
+        if (channelInfo.user_count >= 2) {
+          room.status = "playing";
+        }
+      } else {
+        return Response.json(
+          { error: `Room '${roomId}' not found or has been deleted` },
+          { status: 404 }
+        );
+      }
     }
 
     // 2. Return the current game state, turn, and players

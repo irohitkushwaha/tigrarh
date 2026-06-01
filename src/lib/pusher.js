@@ -45,8 +45,49 @@ export async function triggerEvent(channelName, eventName, data) {
     }
   }
 
-  // Smart Fallback behavior: log events on the server so engineers see synchronization triggers.
+// Smart Fallback behavior: log events on the server so engineers see synchronization triggers.
   // The client will pick up updates automatically by polling the in-memory server state.
   console.log(`📡 [Smart Fallback Mode] Broadcast on channel "${channelName}" - Event "${eventName}":`, JSON.stringify(data, null, 2));
   return { success: true, mode: "fallback", event: eventName };
+}
+
+/**
+ * Queries Pusher's REST API to check the active status of a channel (e.g. user_count).
+ * Acts as our serverless, real-time database room occupancy check!
+ * 
+ * @param {string} channelName The full channel name (e.g. 'presence-room-ABCDEF')
+ * @returns {Promise<{ occupied: boolean, user_count: number, success: boolean, fallback?: boolean }>}
+ */
+export function getChannelInfo(channelName) {
+  return new Promise((resolve) => {
+    if (!pusher) {
+      // In local fallback mode (no Pusher keys), pretend the room exists and has 1 occupant (the Host)
+      // to let local tabs join successfully.
+      resolve({ occupied: true, user_count: 1, success: true, fallback: true });
+      return;
+    }
+
+    pusher.get({
+      path: `/channels/${channelName}`,
+      params: { info: "user_count" }
+    }, (err, request, response) => {
+      if (err) {
+        console.error(`❌ Pusher API channel query failed for ${channelName}:`, err);
+        resolve({ occupied: false, user_count: 0, success: false, error: err.message });
+      } else if (response.statusCode !== 200) {
+        resolve({ occupied: false, user_count: 0, success: true });
+      } else {
+        try {
+          const body = JSON.parse(response.body);
+          resolve({
+            occupied: body.occupied || false,
+            user_count: body.user_count || 0,
+            success: true
+          });
+        } catch (e) {
+          resolve({ occupied: false, user_count: 0, success: false, error: e.message });
+        }
+      }
+    });
+  });
 }
