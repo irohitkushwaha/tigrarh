@@ -1,0 +1,895 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* --- CUSTOM THEME VARIABLES --- */
+:root {
+  --color-clay-deep: #200f05;
+  --color-clay-medium: #30170a;
+  --color-clay-warm: #421a08;
+  --color-clay-hot: #612408;
+  --color-terracotta: #e47234;
+  --color-gold: #ffcb74;
+  --color-gold-spark: #ffe4a0;
+  --color-slate-light: #7c8891;
+  --color-slate-med: #454d52;
+  --color-slate-dark: #1b1e20;
+  --color-wood-bark: #3d1f0b;
+  --color-wood-grain: #7a431d;
+  --color-wood-highlight: #9e5b24;
+  
+  --font-cinzel: 'Cinzel', Georgia, serif;
+  --font-outfit: 'Outfit', Helvetica, sans-serif;
+  
+  --shadow-pebble-inset: inset 2px 3px 5px rgba(255, 255, 255, 0.22),
+                         inset -3px -5px 8px rgba(0, 0, 0, 0.85);
+  --shadow-pebble-drop: 0 10px 18px rgba(0, 0, 0, 0.65), 
+                        0 2px 4px rgba(0, 0, 0, 0.4);
+                        
+  --shadow-stick-inset: inset 0 2px 3px rgba(255, 255, 255, 0.18),
+                        inset 0 -2px 3px rgba(0, 0, 0, 0.6);
+  --shadow-stick-drop: 0 8px 14px rgba(0, 0, 0, 0.6), 
+                       0 2px 3px rgba(0, 0, 0, 0.35);
+
+  --shadow-pit-inset: inset 0 4px 10px rgba(0, 0, 0, 0.85),
+                      inset 0 1px 3px rgba(0, 0, 0, 0.9);
+  --shadow-pit-glow: 0 0 15px rgba(228, 114, 52, 0.35);
+  
+  --border-glass: 1px solid rgba(228, 114, 52, 0.15);
+}
+
+/* --- RESET & FOUNDATION --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: var(--font-outfit);
+  color: #f7ede2;
+  background-color: var(--color-clay-deep);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- IMMERSIVE CLAY EARTH BACKGROUND --- */
+body {
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(97, 36, 8, 0.45) 0%, transparent 55%),
+    radial-gradient(circle at 85% 85%, rgba(66, 26, 8, 0.5) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(48, 23, 10, 0.95) 0%, var(--color-clay-deep) 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  position: relative;
+}
+
+/* Subtle organic clay texture overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.045;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* --- TYPOGRAPHY EFFECTS --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-cinzel);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.clay-text-glow {
+  color: var(--color-gold);
+  text-shadow: 
+    0 0 10px rgba(228, 114, 52, 0.6),
+    0 0 20px rgba(228, 114, 52, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.ancient-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  text-align: center;
+  background: linear-gradient(to bottom, #fff6f0 20%, #ffcb74 50%, #e47234 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.8));
+  position: relative;
+  letter-spacing: 0.1em;
+}
+
+/* --- APP WRAPPER & LAYOUT --- */
+.tigarh-app-wrapper {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/* --- GLASSMORPHISM CONTAINER & PANELS --- */
+.glass-panel {
+  background: rgba(32, 15, 5, 0.55);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  border: var(--border-glass);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-left: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 
+    0 20px 45px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(228, 114, 52, 0.25);
+  box-shadow: 
+    0 24px 50px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* --- THE GAME DASHBOARD --- */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 30px auto 0;
+  align-items: stretch;
+}
+
+/* Sidebar & Stats */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panel-header {
+  border-bottom: 1px solid rgba(228, 114, 52, 0.2);
+  padding-bottom: 12px;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  color: var(--color-gold);
+}
+
+.player-status-card {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.player-status-card.active {
+  background: rgba(228, 114, 52, 0.08);
+  border: 1px solid rgba(228, 114, 52, 0.35);
+  box-shadow: 
+    0 0 15px rgba(228, 114, 52, 0.15),
+    inset 0 0 8px rgba(228, 114, 52, 0.1);
+}
+
+.player-status-card.active .player-title {
+  color: var(--color-gold);
+  font-weight: bold;
+}
+
+.player-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-cinzel);
+  font-size: 1.1rem;
+}
+
+.player-score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* --- THE TIGARH GAME BOARD --- */
+.board-outer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 500px;
+}
+
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(circle at center, rgba(66, 26, 8, 0.7) 0%, rgba(32, 15, 5, 0.85) 75%, rgba(15, 5, 2, 0.95) 100%);
+  border-radius: 24px;
+  border: 2px solid rgba(228, 114, 52, 0.22);
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.85),
+    inset 0 0 40px rgba(0, 0, 0, 0.9);
+  padding: 0;
+}
+
+/* SVG grid lines */
+.board-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.board-line {
+  stroke: rgba(97, 45, 17, 0.65);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.board-line.active {
+  stroke: rgba(228, 114, 52, 0.85);
+  stroke-width: 6;
+  filter: drop-shadow(0 0 5px rgba(228, 114, 52, 0.7));
+}
+
+.board-line.mill-active {
+  stroke: var(--color-gold);
+  stroke-width: 7;
+  filter: drop-shadow(0 0 10px rgba(255, 203, 116, 0.9));
+  animation: mill-line-pulse 1.6s infinite alternate;
+}
+
+@keyframes mill-line-pulse {
+  0% {
+    stroke-width: 6;
+    filter: drop-shadow(0 0 6px rgba(255, 203, 116, 0.8));
+    opacity: 0.85;
+  }
+  100% {
+    stroke-width: 8;
+    filter: drop-shadow(0 0 15px rgba(255, 203, 116, 1));
+    opacity: 1;
+  }
+}
+
+/* --- GAME PIECE NODES / PIT INDENTS --- */
+.board-nodes-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+}
+
+.board-node {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* High-contrast indicators for empty nodes (resembles smooth mud pits or indents) */
+.board-node.empty {
+  background: radial-gradient(circle, rgba(15, 6, 2, 0.95) 0%, rgba(32, 15, 5, 0.8) 65%, rgba(97, 45, 17, 0.3) 100%);
+  border: 1.5px dashed rgba(228, 114, 52, 0.28);
+  box-shadow: var(--shadow-pit-inset), var(--shadow-pit-glow);
+}
+
+.board-node.empty:hover {
+  border-color: rgba(255, 203, 116, 0.65);
+  box-shadow: 
+    inset 0 4px 12px rgba(0, 0, 0, 0.95),
+    0 0 16px rgba(255, 203, 116, 0.45);
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.board-node.valid-move {
+  border: 2px solid rgba(255, 203, 116, 0.7);
+  background: radial-gradient(circle, rgba(255, 203, 116, 0.22) 0%, rgba(20, 9, 3, 0.85) 75%);
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.8),
+    0 0 18px rgba(255, 203, 116, 0.55);
+  animation: valid-node-pulse 1.8s infinite alternate;
+}
+
+@keyframes valid-node-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 10px rgba(255, 203, 116, 0.4);
+    border-color: rgba(255, 203, 116, 0.5);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 203, 116, 0.8);
+    border-color: rgba(255, 203, 116, 0.95);
+  }
+}
+
+.board-node.selected {
+  border: 2px solid var(--color-terracotta);
+  box-shadow: 
+    0 0 28px var(--color-terracotta),
+    inset 0 0 8px rgba(228, 114, 52, 0.5);
+  transform: translate(-50%, -50%) scale(1.18);
+  z-index: 12;
+}
+
+/* --- THEMATIC PIECES --- */
+.piece-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Slide Transition base */
+.piece {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: grab;
+  z-index: 11;
+  transition: 
+    left 0.42s cubic-bezier(0.25, 1, 0.5, 1),
+    top 0.42s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+  will-change: left, top, transform;
+}
+
+.piece:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.15) !important;
+  z-index: 100;
+}
+
+/* 1. SLATE PEBBLES (Player 1) */
+.piece.pebble {
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(circle at 35% 35%, var(--color-slate-light) 0%, var(--color-slate-med) 55%, var(--color-slate-dark) 100%);
+  box-shadow: var(--shadow-pebble-inset), var(--shadow-pebble-drop);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Organic hand-crafted shapes for pebbles (non-perfect circles) */
+.piece.pebble.shape-0 { border-radius: 52% 48% 51% 49% / 49% 53% 47% 51%; }
+.piece.pebble.shape-1 { border-radius: 47% 53% 49% 51% / 52% 48% 52% 48%; }
+.piece.pebble.shape-2 { border-radius: 51% 49% 53% 47% / 48% 52% 49% 51%; }
+.piece.pebble.shape-3 { border-radius: 49% 51% 48% 52% / 53% 47% 51% 49%; }
+
+/* Glassmorphic top-light reflection */
+.piece.pebble::before {
+  content: "";
+  position: absolute;
+  top: 8%;
+  left: 20%;
+  width: 35%;
+  height: 25%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 50% 50% 45% 45%;
+  transform: rotate(-15deg);
+  filter: blur(0.4px);
+  pointer-events: none;
+}
+
+/* 2. WOODEN TWIGS/LOGS (Player 2) */
+.piece.stick {
+  width: 40px;
+  height: 22px;
+  background: linear-gradient(to bottom, var(--color-wood-grain) 0%, #562e12 25%, var(--color-wood-bark) 70%, #201005 100%);
+  box-shadow: var(--shadow-stick-inset), var(--shadow-stick-drop);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Twig slight rotations for rustic feeling */
+.piece.stick.shape-0 { transform: translate(-50%, -50%) rotate(6deg); border-radius: 5px 3px 4px 6px; }
+.piece.stick.shape-1 { transform: translate(-50%, -50%) rotate(-4deg); border-radius: 3px 5px 5px 3px; }
+.piece.stick.shape-2 { transform: translate(-50%, -50%) rotate(2deg); border-radius: 4px 4px 3px 5px; }
+.piece.stick.shape-3 { transform: translate(-50%, -50%) rotate(-8deg); border-radius: 5px 4px 6px 3px; }
+
+/* Wood bark texture strip overlays */
+.piece.stick::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 255, 255, 0.04) 6px,
+    rgba(255, 255, 255, 0.04) 8px,
+    transparent 8px,
+    transparent 13px,
+    rgba(0, 0, 0, 0.18) 13px,
+    rgba(0, 0, 0, 0.18) 15px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Stick wood end-caps for cut detail */
+.piece.stick-cap-l,
+.piece.stick-cap-r {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: 5px;
+  background: radial-gradient(ellipse at center, var(--color-wood-highlight) 10%, var(--color-wood-bark) 65%, #180902 100%);
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.piece.stick-cap-l { left: -2.5px; }
+.piece.stick-cap-r { right: -2.5px; }
+
+/* Stick knot / wood grain highlight */
+.piece.stick-knot {
+  position: absolute;
+  top: 2px;
+  left: 30%;
+  width: 5px;
+  height: 5px;
+  background: #904c1e;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+/* Selected state highlight for active piece */
+.piece.active-selected {
+  filter: brightness(1.2) drop-shadow(0 0 12px var(--color-gold));
+  z-index: 100;
+}
+.piece.pebble.active-selected {
+  transform: translate(-50%, -50%) scale(1.15);
+}
+.piece.stick.active-selected {
+  transform: translate(-50%, -50%) scale(1.15) rotate(0deg) !important;
+}
+
+/* Glow outline pulse for completed Mill (Tiga) pieces */
+.piece.mill-glow {
+  animation: tiga-glow 1.5s infinite alternate;
+  z-index: 20;
+}
+
+@keyframes tiga-glow {
+  0% {
+    filter: drop-shadow(0 0 4px var(--color-gold)) brightness(1);
+  }
+  100% {
+    filter: drop-shadow(0 0 16px var(--color-gold-spark)) brightness(1.35);
+  }
+}
+
+/* Capture Shatter / Fracture Animation */
+.piece.captured-shatter {
+  animation: piece-shatter 0.65s cubic-bezier(0.1, 0.8, 0.35, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes piece-shatter {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    filter: brightness(1.6) contrast(1.3);
+  }
+  35% {
+    transform: translate(-50%, -50%) scale(1.15) rotate(8deg);
+    opacity: 0.95;
+    filter: saturate(1.6) brightness(2) drop-shadow(0 0 10px rgba(255, 80, 0, 0.8));
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0) rotate(55deg);
+    opacity: 0;
+    filter: brightness(0.1) blur(6px);
+  }
+}
+
+/* --- THE CLAY GAME CONTROLS & LOBBY --- */
+.action-btn {
+  font-family: var(--font-cinzel);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  padding: 12px 24px;
+  background: linear-gradient(to bottom, var(--color-clay-hot) 0%, var(--color-clay-warm) 100%);
+  border: 1px solid rgba(228, 114, 52, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  text-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.8);
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.action-btn:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #7a2b09 0%, var(--color-clay-hot) 100%);
+  border-color: rgba(228, 114, 52, 0.7);
+  box-shadow: 
+    0 6px 14px rgba(0, 0, 0, 0.65),
+    0 0 10px rgba(228, 114, 52, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+}
+
+.action-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.action-btn.secondary-btn {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #d8c2b1;
+}
+
+.action-btn.secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  color: #fff;
+}
+
+/* Game Status Board Alert banner */
+.status-banner {
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 500;
+  border-radius: 12px;
+  border: 1px solid rgba(228, 114, 52, 0.2);
+  background: rgba(48, 23, 10, 0.45);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+  color: #fcece0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.pulsing-indicator {
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-terracotta);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--color-terracotta);
+  animation: dot-pulse 1.4s infinite alternate;
+}
+
+@keyframes dot-pulse {
+  0% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 4px var(--color-terracotta); }
+  100% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px var(--color-terracotta); }
+}
+
+/* --- THE RULES OVERLAY / MODAL --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 6, 2, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rules-modal {
+  width: 90%;
+  max-width: 650px;
+  max-height: 82vh;
+  padding: 35px;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transform: scale(0.92);
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 
+    0 30px 70px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(228, 114, 52, 0.15);
+}
+
+.modal-overlay.open .rules-modal {
+  transform: scale(1);
+}
+
+.rules-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(228, 114, 52, 0.3);
+  background: rgba(0,0,0,0.3);
+  color: var(--color-gold);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.rules-modal-close:hover {
+  background: var(--color-clay-hot);
+  border-color: var(--color-terracotta);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+.rules-section-title {
+  font-size: 1.25rem;
+  color: var(--color-gold);
+  border-left: 3px solid var(--color-terracotta);
+  padding-left: 10px;
+  margin-top: 10px;
+}
+
+.rules-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rules-list {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rules-list li {
+  margin-bottom: 4px;
+}
+
+/* --- THE LOBBY VIEW --- */
+.lobby-card {
+  width: 100%;
+  max-width: 680px;
+  margin: 40px auto 0;
+  padding: 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.lobby-subtitle {
+  font-size: 1rem;
+  opacity: 0.75;
+  letter-spacing: 0.05em;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.lobby-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+@media (min-width: 580px) {
+  .lobby-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.lobby-opt-btn {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(228, 114, 52, 0.2);
+  border-radius: 12px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.lobby-opt-btn:hover {
+  background: rgba(228, 114, 52, 0.08);
+  border-color: rgba(228, 114, 52, 0.65);
+  box-shadow: 
+    0 10px 20px rgba(0,0,0,0.5),
+    0 0 15px rgba(228, 114, 52, 0.2);
+  transform: translateY(-3px);
+}
+
+.lobby-opt-btn:active {
+  transform: translateY(1px);
+}
+
+.lobby-opt-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.lobby-opt-title {
+  font-family: var(--font-cinzel);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-gold);
+}
+
+.lobby-opt-desc {
+  font-size: 0.82rem;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+/* Footer / Cultural Stamp */
+.footer-stamp {
+  margin-top: auto;
+  padding: 40px 0 20px;
+  text-align: center;
+  font-size: 0.82rem;
+  opacity: 0.55;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  letter-spacing: 0.04em;
+  z-index: 10;
+}
+
+.footer-stamp strong {
+  color: var(--color-gold);
+}
+
+/* --- MOBILE RESPONSIVENESS & SCALING --- */
+@media (max-width: 960px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 15px;
+  }
+  
+  .sidebar {
+    order: 2; /* Move controls to the bottom on mobile */
+  }
+  
+  .board-outer-container {
+    order: 1;
+    min-height: auto;
+  }
+  
+  .ancient-title {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .tigarh-app-wrapper {
+    padding: 12px;
+  }
+  
+  .lobby-card {
+    padding: 24px 16px;
+  }
+  
+  .rules-modal {
+    padding: 20px 15px;
+  }
+  
+  .board-wrapper {
+    border-radius: 16px;
+    padding: 4%;
+  }
+  
+  .board-node {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .piece.pebble {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .piece.stick {
+    width: 32px;
+    height: 18px;
+  }
+  
+  .piece.stick-cap-l,
+  .piece.stick-cap-r {
+    width: 4px;
+  }
+}
+
+/* Scrollbar styles for glassmorphic elements */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(228, 114, 52, 0.45);
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(228, 114, 52, 0.7);
+}
