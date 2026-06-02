@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Nine Men's Morris - also known as Tigarh",
-  description: "Experience Nine Men's Morris, the classic strategic alignment game also known as Tigarh in Chhattisgarh, India. Play local Pass & Play, Vs Computer AI, or online multiplayer.",
+  title: "Nine Men's Morris - Play online",
+  description: "Experience Nine Men's Morris game, the classic strategic alignment board game. Play local Pass & Play, Vs Computer AI, or online multiplayer.",
 };
 
 export default function RootLayout({ children }) {
