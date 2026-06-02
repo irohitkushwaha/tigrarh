@@ -75,8 +75,6 @@ function LocalPlayContent() {
 
   return (
     <div className="tigarh-app-wrapper">
-      <h1 className="ancient-title" style={{ fontSize: "2.2rem", marginBottom: "15px" }}>9 Men's Morris</h1>
-
       <div className="dashboard-layout">
         {/* Game Controls widget in corner */}
         <GameControlsHeader

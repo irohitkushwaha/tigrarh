@@ -348,8 +348,6 @@ function OnlinePlayContent({ params }) {
 
   return (
     <div className="tigarh-app-wrapper" style={{ position: "relative" }}>
-      <h1 className="ancient-title" style={{ fontSize: "2.2rem", marginBottom: "15px" }}>9 Men's Morris</h1>
-
       <div className="dashboard-layout" style={{ position: "relative" }}>
         {/* Game Controls widget in corner */}
         <GameControlsHeader
