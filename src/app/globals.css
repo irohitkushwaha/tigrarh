@@ -970,3 +970,25 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(228, 114, 52, 0.7);
 }
+
+/* Flickering white border for last opponent move highlight */
+@keyframes opponent-flick {
+  0% {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.9), inset 0 0 6px rgba(255, 255, 255, 0.5);
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+  }
+}
+
+.node-flick-highlight {
+  border: 2px solid #ffffff !important;
+  animation: opponent-flick 1.2s infinite ease-in-out !important;
+  z-index: 20 !important;
+}

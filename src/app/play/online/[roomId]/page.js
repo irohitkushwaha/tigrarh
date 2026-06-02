@@ -52,6 +52,7 @@ function OnlinePlayContent({ params }) {
   const captured2 = 9 - gameState.piecesActive[1] - gameState.piecesToPlace[1]; // Captured pebbles (taken by Player 2 - Guest)
 
   const [pendingLocalMove, setPendingLocalMove] = useState(null);
+  const [lastOpponentMove, setLastOpponentMove] = useState(null);
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
@@ -152,6 +153,19 @@ function OnlinePlayContent({ params }) {
 
         if (data.room.status === "waiting" || data.room.status === "playing" || data.room.status === "finished") {
           const serverState = data.room.gameState;
+
+          const history = serverState.moveHistory || [];
+          if (history.length > 0) {
+            const lastMoveRecord = history[history.length - 1];
+            if (lastMoveRecord.role !== myRole) {
+              setLastOpponentMove(lastMoveRecord.move);
+            } else {
+              setLastOpponentMove(null);
+            }
+          } else {
+            setLastOpponentMove(null);
+          }
+
           const mappedNodes = serverState.board.nodes.map(node => {
             if (node === "tiger") return 1;
             if (node === "stick") return 2;
@@ -228,6 +242,8 @@ function OnlinePlayContent({ params }) {
     const activeRole = gameState.currentPlayer === 1 ? "tigers" : "sticks";
     if (activeRole !== myRole) return; // Not my turn
 
+    setLastOpponentMove(null);
+
     if (moveInfo.type === "place" || moveInfo.type === "move") {
       const { board: newBoard, state: nextState } = applyMove(
         gameState.board,
@@ -248,15 +264,18 @@ function OnlinePlayContent({ params }) {
 
       if (nextState.pendingRemove) {
         setGameState({
-          ...gameState,
           board: newBoard,
+          currentPlayer: nextState.currentPlayer,
+          piecesToPlace: nextState.piecesToPlace,
+          piecesActive: nextState.piecesActive,
           pendingRemove: true,
+          winner: nextState.winner,
         });
         setPendingLocalMove(moveInfo);
         return;
       }
 
-      await submitOnlineMove(moveInfo, newBoard, nextState.winner);
+      await submitOnlineMove(moveInfo, newBoard, nextState.piecesToPlace, nextState.winner);
     }
 
     if (moveInfo.type === "capture") {
@@ -267,45 +286,38 @@ function OnlinePlayContent({ params }) {
         captured: moveInfo.to,
       };
 
-      const finalBoard = [...gameState.board];
-      finalBoard[pendingLocalMove.to] = gameState.currentPlayer;
-      if (pendingLocalMove.from !== undefined && pendingLocalMove.from !== null) {
-        finalBoard[pendingLocalMove.from] = null;
-      }
-      finalBoard[moveInfo.to] = null;
+      const { board: finalBoard, state: nextState } = applyMove(
+        gameState.board,
+        moveInfo,
+        gameState
+      );
 
-      const opp = 3 - gameState.currentPlayer;
-      const oppCount = finalBoard.filter(x => x === opp).length;
-      let onlineWinner = null;
-      if (oppCount < 3) {
-        onlineWinner = gameState.currentPlayer;
+      const checkGameOver = isGameOver(
+        finalBoard,
+        nextState.currentPlayer,
+        nextState.piecesToPlace[nextState.currentPlayer],
+        nextState.piecesActive[nextState.currentPlayer]
+      );
+
+      if (checkGameOver.gameOver) {
+        nextState.winner = checkGameOver.winner;
       }
 
       setPendingLocalMove(null);
-      setGameState(prev => {
-        const nextActive = {
-          1: finalBoard.filter(x => x === 1).length,
-          2: finalBoard.filter(x => x === 2).length,
-        };
-        const nextToPlace = { ...prev.piecesToPlace };
-        if (pendingLocalMove.type === "place") {
-          nextToPlace[prev.currentPlayer] = Math.max(0, nextToPlace[prev.currentPlayer] - 1);
-        }
-        return {
-          ...prev,
-          board: finalBoard,
-          currentPlayer: 3 - prev.currentPlayer,
-          piecesToPlace: nextToPlace,
-          piecesActive: nextActive,
-          pendingRemove: false,
-          winner: onlineWinner,
-        };
+      setGameState({
+        board: finalBoard,
+        currentPlayer: nextState.currentPlayer,
+        piecesToPlace: nextState.piecesToPlace,
+        piecesActive: nextState.piecesActive,
+        pendingRemove: false,
+        winner: nextState.winner,
       });
-      await submitOnlineMove(combinedMove, finalBoard, onlineWinner);
+
+      await submitOnlineMove(combinedMove, finalBoard, nextState.piecesToPlace, nextState.winner);
     }
   };
 
-  const submitOnlineMove = async (move, nodes, resolvedWinner) => {
+  const submitOnlineMove = async (move, nodes, piecesToPlace, resolvedWinner) => {
     try {
       const serverNodes = nodes.map(v => {
         if (v === 1) return "tiger";
@@ -313,8 +325,8 @@ function OnlinePlayContent({ params }) {
         return null;
       });
 
-      const hostPlaced = 9 - gameState.piecesToPlace[1] + (gameState.currentPlayer === 1 && move.type === "place" ? 1 : 0);
-      const guestPlaced = 9 - gameState.piecesToPlace[2] + (gameState.currentPlayer === 2 && move.type === "place" ? 1 : 0);
+      const hostPlaced = 9 - piecesToPlace[1];
+      const guestPlaced = 9 - piecesToPlace[2];
 
       const body = {
         roomId,
@@ -329,7 +341,7 @@ function OnlinePlayContent({ params }) {
           nodes: serverNodes,
           placedTigers: hostPlaced,
           placedSticks: guestPlaced,
-          capturedSticks: 9 - nodes.filter(x => x === 2).length - (9 - guestPlaced),
+          capturedSticks: guestPlaced - nodes.filter(x => x === 2).length,
           phase: (hostPlaced >= 9 && guestPlaced >= 9) ? "movement" : "placement",
         },
         winner: resolvedWinner === 1 ? "tigers" : resolvedWinner === 2 ? "sticks" : null,
@@ -471,6 +483,7 @@ function OnlinePlayContent({ params }) {
           playStickClick={playStickClick}
           playTigaChime={playTigaChime}
           playCaptureShatter={playCaptureShatter}
+          lastOpponentMove={lastOpponentMove}
         />
 
         {/* Bottom: Mine Card */}

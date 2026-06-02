@@ -60,6 +60,7 @@ export default function GameBoard({
   playStickClick,
   playTigaChime,
   playCaptureShatter,
+  lastOpponentMove = null,
 }) {
   const { board, currentPlayer, piecesToPlace, piecesActive, pendingRemove, winner } = gameState;
 
@@ -93,7 +94,6 @@ export default function GameBoard({
     for (let i = 0; i < 24; i++) {
       if (board[i] !== prevBoardRef.current[i] && board[i] === currentPlayer) {
         changedNode = i;
-        break;
       }
     }
     if (changedNode !== null) {
@@ -101,6 +101,28 @@ export default function GameBoard({
     }
     prevBoardRef.current = board;
   }, [board, currentPlayer, pendingRemove]);
+
+  const activeHighlightNode = (() => {
+    if (pendingRemove) {
+      return lastMoveNode;
+    }
+    if (lastOpponentMove && lastOpponentMove.to !== undefined && lastOpponentMove.to !== null) {
+      const oppPiece = board[lastOpponentMove.to];
+      if (oppPiece !== null && checkMill(board, oppPiece, lastOpponentMove.to)) {
+        return lastOpponentMove.to;
+      }
+    }
+    return null;
+  })();
+
+  const isFlickHighlighted = (nodeIdx) => {
+    if (!lastOpponentMove) return false;
+    return (
+      nodeIdx === lastOpponentMove.to ||
+      nodeIdx === lastOpponentMove.from ||
+      nodeIdx === lastOpponentMove.captured
+    );
+  };
 
   // Compute fully active mill lines for highlighting
   useEffect(() => {
@@ -111,8 +133,12 @@ export default function GameBoard({
       const occupant3 = board[mill[2]];
       
       if (occupant1 !== null && occupant1 === occupant2 && occupant2 === occupant3) {
-        // Only highlight this mill if it contains the last move node
-        if (lastMoveNode === null || mill.includes(lastMoveNode)) {
+        const refNode = pendingRemove 
+          ? lastMoveNode 
+          : (lastOpponentMove && lastOpponentMove.to !== undefined ? lastOpponentMove.to : null);
+
+        // Only highlight this mill if it contains the refNode and belongs to the correct player
+        if (refNode !== null && mill.includes(refNode) && board[refNode] === occupant1) {
           activeMills.push(`${mill[0]}-${mill[1]}`);
           activeMills.push(`${mill[1]}-${mill[2]}`);
           
@@ -130,7 +156,7 @@ export default function GameBoard({
       }
     });
     setActiveMillLines(activeMills);
-  }, [board, lastMoveNode]);
+  }, [board, lastMoveNode, lastOpponentMove, pendingRemove]);
 
   const isMyTurn = () => {
     if (winner) return false;
@@ -385,6 +411,9 @@ export default function GameBoard({
             } else if (isSelected) {
               nodeClass += " selected";
             }
+            if (isFlickHighlighted(idx)) {
+              nodeClass += " node-flick-highlight";
+            }
 
             return (
               <div
@@ -443,14 +472,16 @@ export default function GameBoard({
             const shapeIdx = idx % 4;
             pieceClass += ` shape-${shapeIdx}`;
             
-            const isPieceInLastMill = inMill && (lastMoveNode === null || MILLS_LIST.some(mill => 
+            const isPieceInLastMill = inMill && (activeHighlightNode === null || MILLS_LIST.some(mill => 
               mill.includes(idx) && 
-              mill.includes(lastMoveNode) && 
+              mill.includes(activeHighlightNode) && 
               mill.every(n => board[n] === occupant)
             ));
 
             if (isSelected && !isCurrentlyDragged) pieceClass += " active-selected";
-            if (pendingRemove && isPieceInLastMill && !isShattered) pieceClass += " mill-glow";
+            
+            const showMillGlow = isPieceInLastMill && (pendingRemove || (activeHighlightNode !== null && board[activeHighlightNode] === occupant));
+            if (showMillGlow && !isShattered) pieceClass += " mill-glow";
             if (isSelectableCapture && !isShattered) pieceClass += " capture-glow";
             if (isShattered) pieceClass += " captured-shatter";
 
