@@ -222,7 +222,10 @@ export default function Lobby({
         <h2 className="clay-text-glow">Your Nickname</h2>
         <p className="lobby-subtitle">Enter your nickname to join the game.</p>
         
-        <form onSubmit={(e) => { e.preventDefault(); setCurrentStep("join_code"); }} style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "10px" }}>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          onJoinRoomSubmit(joinCode || "auto", guestNameInput.trim() || "Guest Player");
+        }} style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "10px" }}>
           <input
             type="text"
             placeholder="Nickname (e.g. Challenger)"
@@ -236,50 +239,6 @@ export default function Lobby({
               background: "rgba(0, 0, 0, 0.4)",
               color: "#fff",
               fontSize: "1rem",
-              outline: "none"
-            }}
-            autoFocus
-            required
-          />
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button type="submit" className="action-btn" style={{ flex: 1 }}>
-              Next
-            </button>
-            <button type="button" className="action-btn secondary-btn" onClick={goBack}>
-              Back
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  // STEP: GUEST ROOM CODE
-  if (currentStep === "join_code") {
-    return (
-      <div className="lobby-card glass-panel" style={{ maxWidth: "480px" }}>
-        <div className="lobby-opt-icon">🔑</div>
-        <h2 className="clay-text-glow">Enter Room Code</h2>
-        <p className="lobby-subtitle">Enter the 6-character room code to join.</p>
-        
-        <form onSubmit={handleJoinSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "10px" }}>
-          <input
-            type="text"
-            placeholder="AB12CD"
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-            maxLength={6}
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              border: "1px solid rgba(228, 114, 52, 0.3)",
-              background: "rgba(0, 0, 0, 0.4)",
-              color: "#ffcb74",
-              fontSize: "1.2rem",
-              fontFamily: "var(--font-cinzel)",
-              fontWeight: "bold",
-              textAlign: "center",
-              letterSpacing: "0.2em",
               outline: "none"
             }}
             autoFocus

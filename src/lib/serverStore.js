@@ -132,6 +132,18 @@ export function deleteRoom(roomId) {
 }
 
 /**
+ * Finds the first active room that is waiting for a guest player.
+ */
+export function findWaitingRoom() {
+  for (const [roomId, room] of rooms.entries()) {
+    if (room.status === "waiting") {
+      return room;
+    }
+  }
+  return null;
+}
+
+/**
  * Clears expired rooms to save server memory (optional cleanup helper).
  */
 export function cleanExpiredRooms(maxAgeMs = 4 * 60 * 60 * 1000) { // 4 hours

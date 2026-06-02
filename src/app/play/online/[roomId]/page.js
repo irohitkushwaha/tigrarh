@@ -343,69 +343,14 @@ function OnlinePlayContent({ params }) {
     router.push("/");
   };
 
-  // ONBOARDING DISPLAY (Guest name input or full room warning)
-  if (showOnboarding) {
-    return (
-      <div className="tigarh-app-wrapper">
-        <h1 className="ancient-title">Nine Men's Morris</h1>
-        <p style={{ fontFamily: "var(--font-outfit)", fontSize: "0.95rem", opacity: 0.75, textTransform: "uppercase", letterSpacing: "0.22em", margin: "5px 0 25px", color: "var(--color-gold)", textShadow: "0 0 10px rgba(228,114,52,0.3)" }}>
-          also known as
-        </p>
-
-        <div className="lobby-card glass-panel" style={{ maxWidth: "480px" }}>
-          <div className="lobby-opt-icon">{onboardingError ? "⚠️" : "👤"}</div>
-          <h2 className="clay-text-glow">{onboardingError ? "Room Error" : "Join Game Room"}</h2>
-          <p className="lobby-subtitle" style={{ margin: "5px 0 15px" }}>
-            {onboardingError || `Enter your nickname to join Room ${roomId}`}
-          </p>
-
-          {onboardingError ? (
-            <button className="action-btn" onClick={() => router.push("/")} style={{ width: "100%" }}>
-              Exit to Lobby
-            </button>
-          ) : (
-            <form onSubmit={handleJoinOnboardingSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-              <input
-                type="text"
-                placeholder="Nickname (e.g. Challenger)"
-                value={guestNameInput}
-                onChange={(e) => setGuestNameInput(e.target.value)}
-                maxLength={20}
-                style={{
-                  padding: "12px",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(228, 114, 52, 0.3)",
-                  background: "rgba(0, 0, 0, 0.4)",
-                  color: "#fff",
-                  fontSize: "1rem",
-                  outline: "none"
-                }}
-                autoFocus
-                required
-              />
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button type="submit" className="action-btn" style={{ flex: 1 }}>
-                  Join Match
-                </button>
-                <button type="button" className="action-btn secondary-btn" onClick={() => router.push("/")}>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   // Dynamic Position Mapping based on Role (Host on bottom, Guest on top, or vice versa)
   const isMeHost = myRole === "tigers";
 
   return (
-    <div className="tigarh-app-wrapper">
+    <div className="tigarh-app-wrapper" style={{ position: "relative" }}>
       <h1 className="ancient-title" style={{ fontSize: "2.2rem", marginBottom: "15px" }}>9 Men's Morris</h1>
 
-      <div className="dashboard-layout">
+      <div className="dashboard-layout" style={{ position: "relative" }}>
         {/* Game Controls widget in corner */}
         <GameControlsHeader
           soundMuted={soundMuted}
@@ -452,6 +397,66 @@ function OnlinePlayContent({ params }) {
           isMe={true}
         />
       </div>
+
+      {/* Guest Onboarding Overlay Modal */}
+      {showOnboarding && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0, 0, 0, 0.7)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 3000
+        }}>
+          <div className="lobby-card glass-panel" style={{ maxWidth: "480px", width: "90%", margin: "0 20px" }}>
+            <div className="lobby-opt-icon">{onboardingError ? "⚠️" : "👤"}</div>
+            <h2 className="clay-text-glow">{onboardingError ? "Room Error" : "Join Game Room"}</h2>
+            <p className="lobby-subtitle" style={{ margin: "5px 0 15px" }}>
+              {onboardingError || `Enter your nickname to join Room ${roomId}`}
+            </p>
+
+            {onboardingError ? (
+              <button className="action-btn" onClick={() => router.push("/")} style={{ width: "100%" }}>
+                Exit to Lobby
+              </button>
+            ) : (
+              <form onSubmit={handleJoinOnboardingSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                <input
+                  type="text"
+                  placeholder="Nickname (e.g. Challenger)"
+                  value={guestNameInput}
+                  onChange={(e) => setGuestNameInput(e.target.value)}
+                  maxLength={20}
+                  style={{
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(228, 114, 52, 0.3)",
+                    background: "rgba(0, 0, 0, 0.4)",
+                    color: "#fff",
+                    fontSize: "1rem",
+                    outline: "none"
+                  }}
+                  autoFocus
+                  required
+                />
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button type="submit" className="action-btn" style={{ flex: 1 }}>
+                    Join Match
+                  </button>
+                  <button type="button" className="action-btn secondary-btn" onClick={() => router.push("/")}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

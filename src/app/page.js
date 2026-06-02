@@ -66,15 +66,27 @@ export default function Home() {
 
   const handleJoinRoomSubmit = async (code, guestName) => {
     try {
+      let activeCode = code;
+      if (!activeCode || activeCode === "auto") {
+        const findRes = await fetch("/api/game/find-waiting");
+        const findData = await findRes.json();
+        if (findData.success && findData.roomId) {
+          activeCode = findData.roomId;
+        } else {
+          setOnlineError(findData.error || "No active waiting rooms found. Please host a game instead!");
+          return;
+        }
+      }
+
       const res = await fetch("/api/game/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roomId: code, guestId: playerId, guestName }),
+        body: JSON.stringify({ roomId: activeCode, guestId: playerId, guestName }),
       });
       const data = await res.json();
       if (data.success && data.room) {
         // Go directly to dynamic playground route
-        router.push(`/play/online/${code}`);
+        router.push(`/play/online/${activeCode}`);
       } else {
         setOnlineError(data.error || "Room is full or doesn't exist.");
       }
