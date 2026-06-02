@@ -106,8 +106,8 @@ export function GameControlsHeader({
       {/* Right side: volume and exit controls absolute top right */}
       <div style={{
         position: "absolute",
-        top: "20px",
-        right: "20px",
+        top: "15px",
+        right: "15px",
         display: "flex",
         gap: "8px",
         alignItems: "center",
