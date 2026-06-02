@@ -90,12 +90,7 @@ export default function Home() {
 
   return (
     <div className="tigarh-app-wrapper">
-      <>
-        <h1 className="ancient-title">Nine Men's Morris</h1>
-        <p style={{ fontFamily: "var(--font-outfit)", fontSize: "0.95rem", opacity: 0.75, textTransform: "uppercase", letterSpacing: "0.22em", margin: "5px 0 25px", color: "var(--color-gold)", textShadow: "0 0 10px rgba(228,114,52,0.3)" }}>
-          also known as
-        </p>
-      </>
+      <h1 className="ancient-title">Nine Men's Morris</h1>
 
       <Lobby
         onSelectMode={handleSelectMode}
