@@ -282,6 +282,25 @@ function OnlinePlayContent({ params }) {
       }
 
       setPendingLocalMove(null);
+      setGameState(prev => {
+        const nextActive = {
+          1: finalBoard.filter(x => x === 1).length,
+          2: finalBoard.filter(x => x === 2).length,
+        };
+        const nextToPlace = { ...prev.piecesToPlace };
+        if (pendingLocalMove.type === "place") {
+          nextToPlace[prev.currentPlayer] = Math.max(0, nextToPlace[prev.currentPlayer] - 1);
+        }
+        return {
+          ...prev,
+          board: finalBoard,
+          currentPlayer: 3 - prev.currentPlayer,
+          piecesToPlace: nextToPlace,
+          piecesActive: nextActive,
+          pendingRemove: false,
+          winner: onlineWinner,
+        };
+      });
       await submitOnlineMove(combinedMove, finalBoard, onlineWinner);
     }
   };
@@ -348,16 +367,17 @@ function OnlinePlayContent({ params }) {
 
   return (
     <div className="tigarh-app-wrapper" style={{ position: "relative" }}>
+      {/* Game Controls widget in corner */}
+      <GameControlsHeader
+        soundMuted={soundMuted}
+        onToggleSound={() => setSoundMuted(!soundMuted)}
+        onReset={handleReset}
+        roomId={roomId}
+        room={room}
+        isOnline={true}
+      />
+
       <div className="dashboard-layout" style={{ position: "relative" }}>
-        {/* Game Controls widget in corner */}
-        <GameControlsHeader
-          soundMuted={soundMuted}
-          onToggleSound={() => setSoundMuted(!soundMuted)}
-          onReset={handleReset}
-          roomId={roomId}
-          room={room}
-          isOnline={true}
-        />
 
         {/* Top: Opponent Card or Lobby Invite Panel */}
         {isMeHost && (!room || !room.guest) ? (

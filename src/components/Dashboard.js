@@ -72,42 +72,44 @@ export function GameControlsHeader({
 
   const showInviteBox = false;
 
-  return (
-    <>
-      {/* Left side: invite tags absolute top left */}
-      {showInviteBox && (
-        <div style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px",
-          display: "flex",
-          gap: "10px",
-          alignItems: "center",
-          zIndex: 100,
-          background: "rgba(32, 15, 5, 0.65)",
-          padding: "6px 12px",
-          borderRadius: "8px",
-          border: "1px solid rgba(228, 114, 52, 0.2)",
-          backdropFilter: "blur(8px)"
-        }}>
-          <span style={{ color: "var(--color-gold)", fontWeight: "500", fontSize: "0.85rem" }}>
-            🔑 Code: <strong>{roomId}</strong>
-          </span>
-          <button 
-            className="action-btn secondary-btn" 
-            onClick={copyShareLink} 
-            style={{ padding: "4px 10px", fontSize: "0.75rem", borderRadius: "6px" }}
+  if (!isOnline) {
+    return (
+      <div style={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        marginBottom: "10px",
+        fontSize: "0.9rem"
+      }}>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button
+            className="action-btn secondary-btn"
+            onClick={onToggleSound}
+            title="Toggle Sound"
+            style={{ padding: "6px 10px", fontSize: "0.85rem", borderRadius: "6px" }}
           >
-            Copy URL
+            {soundMuted ? "🔇 Muted" : "🔊 Sound"}
+          </button>
+          <button
+            className="action-btn"
+            onClick={onReset}
+            style={{ padding: "6px 12px", fontSize: "0.85rem", borderRadius: "6px" }}
+          >
+            🚪 Exit
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Right side: volume and exit controls absolute top right */}
+  return (
+    <>
+      {/* Right side: volume and exit controls absolute top right in online play */}
       <div style={{
         position: "absolute",
-        top: "15px",
-        right: "15px",
+        top: "20px",
+        right: "20px",
         display: "flex",
         gap: "8px",
         alignItems: "center",
