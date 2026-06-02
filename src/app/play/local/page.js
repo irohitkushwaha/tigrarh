@@ -2,8 +2,8 @@
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PlayerDetailsBar, GameControlsHeader } from "../../../components/Dashboard";
 import GameBoard from "../../../components/GameBoard";
-import Dashboard from "../../../components/Dashboard";
 import {
   playPebbleThud,
   playStickClick,
@@ -31,6 +31,10 @@ function LocalPlayContent() {
   });
 
   const [soundMuted, setSoundMuted] = useState(false);
+
+  // Calculate captured counts
+  const captured1 = 9 - gameState.piecesActive[2] - gameState.piecesToPlace[2]; // Captured sticks (taken by Player 1)
+  const captured2 = 9 - gameState.piecesActive[1] - gameState.piecesToPlace[1]; // Captured pebbles (taken by Player 2)
 
   const applyLocalMove = (moveInfo) => {
     const { board: newBoard, state: nextState } = applyMove(
@@ -74,19 +78,26 @@ function LocalPlayContent() {
       <h1 className="ancient-title" style={{ fontSize: "2.2rem", marginBottom: "15px" }}>9 Men's Morris</h1>
 
       <div className="dashboard-layout">
-        <Dashboard
-          gameState={gameState}
-          player1Name="Player 1"
-          player2Name="Player 2"
-          flyingMode={flyingMode}
-          onToggleFlying={() => {}} // Disabled in play
-          isOnline={false}
-          isAIMode={false}
+        {/* Game Controls widget in corner */}
+        <GameControlsHeader
           soundMuted={soundMuted}
           onToggleSound={() => setSoundMuted(!soundMuted)}
           onReset={handleReset}
+          isOnline={false}
         />
 
+        {/* Top: Opponent Bar (Player 2 - Sticks) */}
+        <PlayerDetailsBar
+          name="Player 2"
+          isTurn={gameState.currentPlayer === 2}
+          piecesToPlaceCount={gameState.piecesToPlace[2]}
+          piecesActiveCount={gameState.piecesActive[2]}
+          capturedCount={captured2}
+          icon="🪵"
+          isMe={false}
+        />
+
+        {/* Central interactive GameBoard */}
         <GameBoard
           gameState={gameState}
           myRole="tigers"
@@ -98,6 +109,17 @@ function LocalPlayContent() {
           playStickClick={playStickClick}
           playTigaChime={playTigaChime}
           playCaptureShatter={playCaptureShatter}
+        />
+
+        {/* Bottom: Player Bar (Player 1 - Pebbles) */}
+        <PlayerDetailsBar
+          name="Player 1"
+          isTurn={gameState.currentPlayer === 1}
+          piecesToPlaceCount={gameState.piecesToPlace[1]}
+          piecesActiveCount={gameState.piecesActive[1]}
+          capturedCount={captured1}
+          icon="⚪"
+          isMe={true}
         />
       </div>
     </div>

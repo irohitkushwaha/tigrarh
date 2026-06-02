@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef, use, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PlayerDetailsBar, GameControlsHeader } from "../../../../components/Dashboard";
 import GameBoard from "../../../../components/GameBoard";
-import Dashboard from "../../../../components/Dashboard";
 import {
   playPebbleThud,
   playStickClick,
@@ -46,6 +46,10 @@ function OnlinePlayContent({ params }) {
   const [player2Name, setPlayer2Name] = useState("Waiting for Guest...");
   const [room, setRoom] = useState(null);
   const [soundMuted, setSoundMuted] = useState(false);
+
+  // Calculate captured counts
+  const captured1 = 9 - gameState.piecesActive[2] - gameState.piecesToPlace[2]; // Captured sticks (taken by Player 1 - Host)
+  const captured2 = 9 - gameState.piecesActive[1] - gameState.piecesToPlace[1]; // Captured pebbles (taken by Player 2 - Guest)
 
   const [pendingLocalMove, setPendingLocalMove] = useState(null);
 
@@ -311,7 +315,6 @@ function OnlinePlayContent({ params }) {
   };
 
   const handleReset = async () => {
-    // If Host exits, cancel room
     if (myRole === "tigers") {
       try {
         await fetch("/api/game/cancel", {
@@ -379,27 +382,36 @@ function OnlinePlayContent({ params }) {
     );
   }
 
+  // Dynamic Position Mapping based on Role (Host on bottom, Guest on top, or vice versa)
+  const isMeHost = myRole === "tigers";
+
   return (
     <div className="tigarh-app-wrapper">
       <h1 className="ancient-title" style={{ fontSize: "2.2rem", marginBottom: "15px" }}>9 Men's Morris</h1>
 
       <div className="dashboard-layout">
-        <Dashboard
-          gameState={gameState}
-          player1Name={player1Name}
-          player2Name={player2Name}
-          flyingMode={flyingMode}
-          onToggleFlying={() => {}}
-          isOnline={true}
-          isAIMode={false}
+        {/* Game Controls widget in corner */}
+        <GameControlsHeader
           soundMuted={soundMuted}
           onToggleSound={() => setSoundMuted(!soundMuted)}
           onReset={handleReset}
           roomId={roomId}
           room={room}
-          isHost={myRole === "tigers"}
+          isOnline={true}
         />
 
+        {/* Top: Opponent Card */}
+        <PlayerDetailsBar
+          name={isMeHost ? player2Name : player1Name}
+          isTurn={isMeHost ? (gameState.currentPlayer === 2) : (gameState.currentPlayer === 1)}
+          piecesToPlaceCount={isMeHost ? gameState.piecesToPlace[2] : gameState.piecesToPlace[1]}
+          piecesActiveCount={isMeHost ? gameState.piecesActive[2] : gameState.piecesActive[1]}
+          capturedCount={isMeHost ? captured2 : captured1}
+          icon={isMeHost ? "🪵" : "⚪"}
+          isMe={false}
+        />
+
+        {/* Central Game Board */}
         <GameBoard
           gameState={gameState}
           myRole={myRole}
@@ -411,6 +423,17 @@ function OnlinePlayContent({ params }) {
           playStickClick={playStickClick}
           playTigaChime={playTigaChime}
           playCaptureShatter={playCaptureShatter}
+        />
+
+        {/* Bottom: Mine Card */}
+        <PlayerDetailsBar
+          name={isMeHost ? player1Name : player2Name}
+          isTurn={isMeHost ? (gameState.currentPlayer === 1) : (gameState.currentPlayer === 2)}
+          piecesToPlaceCount={isMeHost ? gameState.piecesToPlace[1] : gameState.piecesToPlace[2]}
+          piecesActiveCount={isMeHost ? gameState.piecesActive[1] : gameState.piecesActive[2]}
+          capturedCount={isMeHost ? captured1 : captured2}
+          icon={isMeHost ? "⚪" : "🪵"}
+          isMe={true}
         />
       </div>
     </div>

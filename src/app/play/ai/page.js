@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PlayerDetailsBar, GameControlsHeader } from "../../../components/Dashboard";
 import GameBoard from "../../../components/GameBoard";
-import Dashboard from "../../../components/Dashboard";
 import {
   playPebbleThud,
   playStickClick,
@@ -33,6 +33,10 @@ function AIPlayContent() {
 
   const [aiDifficulty, setAiDifficulty] = useState("hard");
   const [soundMuted, setSoundMuted] = useState(false);
+
+  // Calculate captured counts
+  const captured1 = 9 - gameState.piecesActive[2] - gameState.piecesToPlace[2]; // Captured sticks (taken by Player 1 - You)
+  const captured2 = 9 - gameState.piecesActive[1] - gameState.piecesToPlace[1]; // Captured pebbles (taken by Player 2 - AI)
 
   const isAiThinking = useRef(false);
 
@@ -109,21 +113,26 @@ function AIPlayContent() {
       <h1 className="ancient-title" style={{ fontSize: "2.2rem", marginBottom: "15px" }}>9 Men's Morris</h1>
 
       <div className="dashboard-layout">
-        <Dashboard
-          gameState={gameState}
-          player1Name="You"
-          player2Name="Forest Spirit"
-          flyingMode={flyingMode}
-          onToggleFlying={() => {}}
-          isOnline={false}
-          isAIMode={true}
-          aiDifficulty={aiDifficulty}
-          onChangeAIDifficulty={setAiDifficulty}
+        {/* Game Controls widget in corner */}
+        <GameControlsHeader
           soundMuted={soundMuted}
           onToggleSound={() => setSoundMuted(!soundMuted)}
           onReset={handleReset}
+          isOnline={false}
         />
 
+        {/* Top: Opponent Bar (AI - Sticks) */}
+        <PlayerDetailsBar
+          name={`Forest Spirit (AI - ${aiDifficulty.toUpperCase()})`}
+          isTurn={gameState.currentPlayer === 2}
+          piecesToPlaceCount={gameState.piecesToPlace[2]}
+          piecesActiveCount={gameState.piecesActive[2]}
+          capturedCount={captured2}
+          icon="🤖"
+          isMe={false}
+        />
+
+        {/* Central interactive GameBoard */}
         <GameBoard
           gameState={gameState}
           myRole="tigers"
@@ -135,6 +144,17 @@ function AIPlayContent() {
           playStickClick={playStickClick}
           playTigaChime={playTigaChime}
           playCaptureShatter={playCaptureShatter}
+        />
+
+        {/* Bottom: Player Bar (You - Pebbles) */}
+        <PlayerDetailsBar
+          name="You"
+          isTurn={gameState.currentPlayer === 1}
+          piecesToPlaceCount={gameState.piecesToPlace[1]}
+          piecesActiveCount={gameState.piecesActive[1]}
+          capturedCount={captured1}
+          icon="⚪"
+          isMe={true}
         />
       </div>
     </div>

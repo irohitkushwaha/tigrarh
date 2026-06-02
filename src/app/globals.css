@@ -141,28 +141,86 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- THE GAME DASHBOARD --- */
 .dashboard-layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 30px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 30px auto 0;
-  align-items: stretch;
-}
-
-/* Sidebar & Stats */
-.sidebar {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 20px;
+  width: 100%;
+  max-width: 650px;
+  margin: 15px auto 0;
 }
 
-.panel-header {
-  border-bottom: 1px solid rgba(228, 114, 52, 0.2);
-  padding-bottom: 12px;
-  margin-bottom: 15px;
-  font-size: 1.3rem;
+/* Horizontal Player Scoreboards */
+.horizontal-player-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  width: 100%;
+  background: rgba(32, 15, 5, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(228, 114, 52, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.horizontal-player-card.active-turn {
+  background: rgba(228, 114, 52, 0.08);
+  border-color: rgba(255, 203, 116, 0.65);
+  box-shadow: 
+    0 0 20px rgba(255, 203, 116, 0.3),
+    inset 0 0 8px rgba(255, 203, 116, 0.1);
+}
+
+.player-details-row {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  font-size: 0.92rem;
+  color: #ebd7c7;
+}
+
+.player-details-row strong {
   color: var(--color-gold);
+}
+
+/* Flickering text animation */
+.flicker-turn-text {
+  font-family: var(--font-cinzel);
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--color-gold);
+  text-shadow: 0 0 8px var(--color-gold);
+  animation: turn-text-blink 1.2s infinite alternate;
+}
+
+@keyframes turn-text-blink {
+  0% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
+/* Mill Active Alert Banner */
+.mill-highlight-banner {
+  background: linear-gradient(135deg, rgba(200, 30, 30, 0.85) 0%, rgba(130, 15, 15, 0.9) 100%);
+  border: 1px solid #ff4444;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+  color: #fff;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+  animation: mill-banner-pulse 1.4s infinite alternate;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  margin-top: 10px;
+}
+
+@keyframes mill-banner-pulse {
+  0% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); border-color: #cc2222; }
+  100% { box-shadow: 0 0 22px rgba(255, 0, 0, 0.7); border-color: #ff6666; }
 }
 
 .player-status-card {
@@ -408,11 +466,11 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
 }
 
-/* 2. WOODEN TWIGS/LOGS (Player 2) */
+/* 2. SLATE STICKS (Player 2 - Standardized matching color) */
 .piece.stick {
   width: 40px;
   height: 22px;
-  background: linear-gradient(to bottom, var(--color-wood-grain) 0%, #562e12 25%, var(--color-wood-bark) 70%, #201005 100%);
+  background: linear-gradient(to bottom, var(--color-slate-light) 0%, var(--color-slate-med) 55%, var(--color-slate-dark) 100%);
   box-shadow: var(--shadow-stick-inset), var(--shadow-stick-drop);
   display: flex;
   justify-content: center;
@@ -448,14 +506,14 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
 }
 
-/* Stick wood end-caps for cut detail */
+/* Stick slate end-caps for cut detail */
 .piece.stick-cap-l,
 .piece.stick-cap-r {
   position: absolute;
   top: 2px;
   bottom: 2px;
   width: 5px;
-  background: radial-gradient(ellipse at center, var(--color-wood-highlight) 10%, var(--color-wood-bark) 65%, #180902 100%);
+  background: radial-gradient(ellipse at center, var(--color-slate-light) 10%, var(--color-slate-med) 65%, var(--color-slate-dark) 100%);
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.45);
   pointer-events: none;
@@ -464,14 +522,14 @@ h1, h2, h3, h4, h5, h6 {
 .piece.stick-cap-l { left: -2.5px; }
 .piece.stick-cap-r { right: -2.5px; }
 
-/* Stick knot / wood grain highlight */
+/* Stick knot highlight */
 .piece.stick-knot {
   position: absolute;
   top: 2px;
   left: 30%;
   width: 5px;
   height: 5px;
-  background: #904c1e;
+  background: var(--color-slate-light);
   border-radius: 50%;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
   pointer-events: none;
