@@ -13,12 +13,31 @@ export default function Dashboard({
   soundMuted = false,
   onToggleSound,
   onReset,
+  roomId = "",
+  room = null,
+  isHost = false,
 }) {
   const { currentPlayer, piecesToPlace, piecesActive, pendingRemove, winner } = gameState;
   
   // Calculate captured counts (total pieces are 9, so captured is 9 - active - inHand)
   const captured1 = 9 - piecesActive[2] - piecesToPlace[2]; // Captured sticks (taken by Player 1)
   const captured2 = 9 - piecesActive[1] - piecesToPlace[1]; // Captured pebbles (taken by Player 2)
+
+  const getShareLink = () => {
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}?join=${roomId}`;
+    }
+    return `?join=${roomId}`;
+  };
+
+  const copyShareLink = () => {
+    const link = getShareLink();
+    navigator.clipboard.writeText(link);
+    alert("Shareable join link copied to clipboard!");
+  };
+
+  // If online game and guest is not connected
+  const showInviteBox = isOnline && roomId && (!room || !room.guest || room.status === "waiting");
 
   return (
     <div className="sidebar">
@@ -36,6 +55,11 @@ export default function Dashboard({
             <>
               <div className="pulsing-indicator" style={{ backgroundColor: "var(--color-gold)", boxShadow: "0 0 10px var(--color-gold)" }} />
               <span>Capture an Opponent Piece!</span>
+            </>
+          ) : showInviteBox ? (
+            <>
+              <div className="pulsing-indicator" style={{ backgroundColor: "var(--color-gold)" }} />
+              <span>Waiting for Guest...</span>
             </>
           ) : (
             <>
@@ -79,6 +103,23 @@ export default function Dashboard({
           </div>
         </div>
       </div>
+
+      {/* SHARE CODE LOBBY BOX (Displays inside playground until guest joins) */}
+      {showInviteBox && (
+        <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "10px", alignItems: "center", textAlign: "center" }}>
+          <div className="panel-header" style={{ width: "100%", marginBottom: "5px" }}>Invite Opponent</div>
+          <p style={{ fontSize: "0.82rem", opacity: 0.8, lineHeight: 1.4 }}>
+            Share this link or code with your friend to connect instantly:
+          </p>
+          <div style={{ background: "rgba(0,0,0,0.3)", padding: "10px 20px", borderRadius: "8px", width: "100%", margin: "5px 0" }}>
+            <div style={{ fontSize: "0.7rem", textTransform: "uppercase", opacity: 0.6, letterSpacing: "0.05em" }}>Room Code</div>
+            <div style={{ fontSize: "1.6rem", fontFamily: "var(--font-cinzel)", fontWeight: "bold", color: "var(--color-gold)" }}>{roomId}</div>
+          </div>
+          <button className="action-btn" onClick={copyShareLink} style={{ width: "100%", padding: "8px 12px", fontSize: "0.85rem" }}>
+            🔗 Copy Invite Link
+          </button>
+        </div>
+      )}
 
       {/* SETTINGS CARD */}
       <div className="glass-panel" style={{ padding: "20px" }}>

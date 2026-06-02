@@ -100,15 +100,11 @@ export default function Home() {
       const data = await res.json();
       if (data.success && data.room) {
         setRoom(data.room);
-        // If room state indicates we are playing, update board state
-        if (data.room.status === "playing" || data.room.status === "finished") {
+        
+        // If room state is waiting or playing, show active playground
+        if (data.room.status === "waiting" || data.room.status === "playing" || data.room.status === "finished") {
           if (gameMode !== "online-active") {
             setGameMode("online-active");
-          }
-
-          // Sync the Host's selected ruleset
-          if (data.room.hasOwnProperty("flyingMode")) {
-            setFlyingMode(data.room.flyingMode);
           }
           
           // Map server board variables back to client gameState
@@ -142,7 +138,7 @@ export default function Home() {
           });
 
           setPlayer1Name(data.room.host.name);
-          setPlayer2Name(data.room.guest?.name || "Guest Player");
+          setPlayer2Name(data.room.guest?.name || "Waiting for Guest...");
         } else if (data.room.status === "canceled") {
           setOnlineError("The Host has canceled this game room.");
           handleReset();
@@ -226,6 +222,9 @@ export default function Home() {
 
     // --- 2. ONLINE MULTIPLAYER GAME MODE ---
     if (gameMode === "online-active") {
+      // Prevent making a move if guest is not connected
+      if (!room || !room.guest) return;
+
       const activeRole = turnToRole(gameState.currentPlayer);
       if (activeRole !== myRole) return; // Not my turn!
 
@@ -301,12 +300,8 @@ export default function Home() {
         return null;
       });
 
-      const tigersPlaced = nodes.filter(x => x === 1).length + (gameState.currentPlayer === 1 && move.type === "place" ? 0 : 0); 
-      // simple mapper
       const hostPlaced = 9 - gameState.piecesToPlace[1] + (gameState.currentPlayer === 1 && move.type === "place" ? 1 : 0);
       const guestPlaced = 9 - gameState.piecesToPlace[2] + (gameState.currentPlayer === 2 && move.type === "place" ? 1 : 0);
-
-      const capturedCount = nodes.filter(x => x === 2).length;
 
       const body = {
         roomId,
@@ -351,6 +346,7 @@ export default function Home() {
       setPlayer1Name("Player 1");
       setPlayer2Name("Player 2");
       setGameMode("local");
+      setFlyingMode(options.hasOwnProperty("flyingMode") ? options.flyingMode : true);
       setGameState({
         board: Array(24).fill(null),
         currentPlayer: 1,
@@ -364,6 +360,7 @@ export default function Home() {
       setPlayer1Name("You");
       setPlayer2Name("Forest Spirit");
       setGameMode("ai");
+      setFlyingMode(options.hasOwnProperty("flyingMode") ? options.flyingMode : true);
       setGameState({
         board: Array(24).fill(null),
         currentPlayer: 1,
@@ -392,7 +389,9 @@ export default function Home() {
           setRoom(data.room);
           setMyRole("tigers"); // Host is Pebbles
           setFlyingMode(data.room.flyingMode); // Lock rules locally
-          setGameMode("online-host");
+          setPlayer1Name(name);
+          setPlayer2Name("Waiting for Guest...");
+          setGameMode("online-active"); // Go directly to playground
           playPebbleThud();
         } else {
           setOnlineError(data.error || "Could not create online room.");
@@ -459,6 +458,29 @@ export default function Home() {
     }
   };
 
+  // State to hold join parameter from URL
+  const [initialJoinCode, setInitialJoinCode] = useState("");
+
+  // --- PERSISTENT PLAYER ID & JOIN URL READING ---
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      let pId = localStorage.getItem("tigarh_player_id");
+      if (!pId) {
+        pId = "PLAYER_" + Math.random().toString(36).substring(2, 8).toUpperCase();
+        localStorage.setItem("tigarh_player_id", pId);
+      }
+      setPlayerId(pId);
+      
+      // Auto-join from URL parameter if present
+      const params = new URLSearchParams(window.location.search);
+      const joinRoomId = params.get("join");
+      if (joinRoomId) {
+        setInitialJoinCode(joinRoomId.toUpperCase());
+        setGameMode("lobby");
+      }
+    }
+  }, []);
+
   const handleReset = () => {
     setGameState({
       board: Array(24).fill(null),
@@ -470,6 +492,7 @@ export default function Home() {
     });
     setRoomId("");
     setRoom(null);
+    setInitialJoinCode("");
     setGameMode("lobby");
     setPendingLocalMove(null);
     playPebbleThud();
@@ -482,10 +505,16 @@ export default function Home() {
 
   return (
     <div className="tigarh-app-wrapper">
-      <h1 className="ancient-title">TIGARH</h1>
-      <p style={{ fontFamily: "var(--font-outfit)", fontSize: "0.95rem", opacity: 0.75, textTransform: "uppercase", letterSpacing: "0.22em", margin: "5px 0 25px", color: "var(--color-gold)", textShadow: "0 0 10px rgba(228,114,52,0.3)" }}>
-        Ancient Mud & Stone Alignment
-      </p>
+      {gameMode === "lobby" ? (
+        <>
+          <h1 className="ancient-title">Nine Men's Morris</h1>
+          <p style={{ fontFamily: "var(--font-outfit)", fontSize: "0.95rem", opacity: 0.75, textTransform: "uppercase", letterSpacing: "0.22em", margin: "5px 0 25px", color: "var(--color-gold)", textShadow: "0 0 10px rgba(228,114,52,0.3)" }}>
+            also known as
+          </p>
+        </>
+      ) : (
+        <h1 className="ancient-title" style={{ fontSize: "2.2rem", marginBottom: "15px" }}>9 Men's Morris</h1>
+      )}
 
       {/* Mode selectors & Lobby wrapper */}
       {gameMode === "lobby" || gameMode === "online-host" ? (
@@ -501,6 +530,7 @@ export default function Home() {
           onJoinRoomSubmit={handleJoinRoomSubmit}
           flyingMode={flyingMode}
           onToggleFlying={() => setFlyingMode(!flyingMode)}
+          initialJoinCode={initialJoinCode}
         />
       ) : (
         <div className="dashboard-layout">
@@ -518,6 +548,9 @@ export default function Home() {
             soundMuted={soundMuted}
             onToggleSound={() => setSoundMuted(!soundMuted)}
             onReset={handleReset}
+            roomId={roomId}
+            room={room}
+            isHost={room && room.host.id === playerId}
           />
 
           {/* Interactive GameBoard wrapper */}
@@ -550,12 +583,6 @@ export default function Home() {
 
       {/* Scrolling Rules overlay */}
       <RulesModal isOpen={rulesOpen} onClose={() => setRulesOpen(false)} />
-
-      {/* Traditional Indian footer stamp */}
-      <footer className="footer-stamp">
-        <span>Handcrafted in the Clay Traditions of <strong>Chhattisgarh, India</strong></span>
-        <span style={{ fontSize: "0.72rem", opacity: 0.65 }}>Tigarh Strategy Engine • Styled in Pure Terracotta Mud & Slate Pebbles</span>
-      </footer>
     </div>
   );
 }

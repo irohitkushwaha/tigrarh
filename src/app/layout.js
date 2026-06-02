@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Tigarh - Traditional Board Game of Chhattisgarh",
-  description: "Experience Tigarh, the traditional Indian Nine Men's Morris strategic alignment game of Chhattisgarh. Play with slate pebbles and forest twigs, form Tigas (mills), and experience immersive procedural sound effects in this stunning terracotta design.",
+  title: "Nine Men's Morris - also known as Tigarh",
+  description: "Experience Nine Men's Morris, the classic strategic alignment game also known as Tigarh in Chhattisgarh, India. Play local Pass & Play, Vs Computer AI, or online multiplayer.",
 };
 
 export default function RootLayout({ children }) {
