@@ -78,6 +78,30 @@ export default function GameBoard({
     setSelectedNode(null);
   }, [currentPlayer, pendingRemove]);
 
+  const prevBoardRef = useRef(board);
+  const [lastMoveNode, setLastMoveNode] = useState(null);
+
+  // Track the last moved node index when a mill is formed
+  useEffect(() => {
+    if (!pendingRemove) {
+      setLastMoveNode(null);
+      prevBoardRef.current = board;
+      return;
+    }
+
+    let changedNode = null;
+    for (let i = 0; i < 24; i++) {
+      if (board[i] !== prevBoardRef.current[i] && board[i] === currentPlayer) {
+        changedNode = i;
+        break;
+      }
+    }
+    if (changedNode !== null) {
+      setLastMoveNode(changedNode);
+    }
+    prevBoardRef.current = board;
+  }, [board, currentPlayer, pendingRemove]);
+
   // Compute fully active mill lines for highlighting
   useEffect(() => {
     const activeMills = [];
@@ -87,23 +111,26 @@ export default function GameBoard({
       const occupant3 = board[mill[2]];
       
       if (occupant1 !== null && occupant1 === occupant2 && occupant2 === occupant3) {
-        activeMills.push(`${mill[0]}-${mill[1]}`);
-        activeMills.push(`${mill[1]}-${mill[2]}`);
-        
-        if (mill[0] === 6 && mill[2] === 0) {
-          activeMills.push(`6-7`);
-          activeMills.push(`7-0`);
-        } else if (mill[0] === 14 && mill[2] === 8) {
-          activeMills.push(`14-15`);
-          activeMills.push(`15-8`);
-        } else if (mill[0] === 22 && mill[2] === 16) {
-          activeMills.push(`22-23`);
-          activeMills.push(`23-16`);
+        // Only highlight this mill if it contains the last move node
+        if (lastMoveNode === null || mill.includes(lastMoveNode)) {
+          activeMills.push(`${mill[0]}-${mill[1]}`);
+          activeMills.push(`${mill[1]}-${mill[2]}`);
+          
+          if (mill[0] === 6 && mill[2] === 0) {
+            activeMills.push(`6-7`);
+            activeMills.push(`7-0`);
+          } else if (mill[0] === 14 && mill[2] === 8) {
+            activeMills.push(`14-15`);
+            activeMills.push(`15-8`);
+          } else if (mill[0] === 22 && mill[2] === 16) {
+            activeMills.push(`22-23`);
+            activeMills.push(`23-16`);
+          }
         }
       }
     });
     setActiveMillLines(activeMills);
-  }, [board]);
+  }, [board, lastMoveNode]);
 
   const isMyTurn = () => {
     if (winner) return false;
@@ -306,6 +333,7 @@ export default function GameBoard({
   };
 
   const isLineInMill = (p1, p2) => {
+    if (!pendingRemove) return false;
     return activeMillLines.includes(`${p1}-${p2}`) || activeMillLines.includes(`${p2}-${p1}`);
   };
 
@@ -415,8 +443,14 @@ export default function GameBoard({
             const shapeIdx = idx % 4;
             pieceClass += ` shape-${shapeIdx}`;
             
+            const isPieceInLastMill = inMill && (lastMoveNode === null || MILLS_LIST.some(mill => 
+              mill.includes(idx) && 
+              mill.includes(lastMoveNode) && 
+              mill.every(n => board[n] === occupant)
+            ));
+
             if (isSelected && !isCurrentlyDragged) pieceClass += " active-selected";
-            if (inMill && !isShattered) pieceClass += " mill-glow";
+            if (pendingRemove && isPieceInLastMill && !isShattered) pieceClass += " mill-glow";
             if (isSelectableCapture && !isShattered) pieceClass += " capture-glow";
             if (isShattered) pieceClass += " captured-shatter";
 
@@ -457,13 +491,6 @@ export default function GameBoard({
         </div>
 
       </div>
-
-      {/* Mill (Tiga) Formed Alert Banner (Requested split highlight) */}
-      {pendingRemove && isMyTurn() && (
-        <div className="mill-highlight-banner">
-          🔥 TIGA FORMED! Pick an opponent piece to capture.
-        </div>
-      )}
     </div>
   );
 }
