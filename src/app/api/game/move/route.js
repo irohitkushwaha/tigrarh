@@ -128,13 +128,7 @@ export async function POST(request) {
     if (winner) {
       currentGameState.winner = winner;
     } else {
-      // Server-side win checks for Tigarh:
-      // Tigers win if they capture 5 sticks/goats
-      if (currentGameState.board.capturedSticks >= 5) {
-        currentGameState.winner = "tigers";
-      }
-      // Sticks win if all 3 tigers are trapped (can be flagged by client or evaluated)
-      // We will respect a client-triggered victory condition or allow them to pass it.
+      currentGameState.winner = null;
     }
 
     // Mark room status as finished if a winner is declared

@@ -53,6 +53,11 @@ function OnlinePlayContent({ params }) {
 
   const [pendingLocalMove, setPendingLocalMove] = useState(null);
 
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
+  const pendingLocalMoveRef = useRef(pendingLocalMove);
+  pendingLocalMoveRef.current = pendingLocalMove;
+
   const pollingRef = useRef(null);
 
   // --- INITIALIZATION ---
@@ -131,6 +136,14 @@ function OnlinePlayContent({ params }) {
 
   const fetchRoomState = async () => {
     try {
+      // AVOID OVERWRITING ACTIVE LOCAL MILL TRANSACTION
+      // If the local player has formed a mill and is selecting a piece to capture,
+      // skip updating local gameState until the combined placement/movement and capture
+      // transaction is completed and sent to the server.
+      if (pendingLocalMoveRef.current || gameStateRef.current.pendingRemove) {
+        return;
+      }
+
       const res = await fetch(`/api/game/state?roomId=${roomId}`);
       const data = await res.json();
       if (data.success && data.room) {
@@ -150,6 +163,9 @@ function OnlinePlayContent({ params }) {
 
           const p1Placed = serverState.board.placedTigers || 0;
           const p2Placed = serverState.board.placedSticks || 0;
+
+          // Double check transaction flag again before setting state
+          if (pendingLocalMoveRef.current) return;
 
           setGameState({
             board: mappedNodes,

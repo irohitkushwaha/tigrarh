@@ -562,6 +562,22 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Red pulsing capture glow for target pieces that can be captured */
+.piece.capture-glow {
+  animation: capture-pulse 1.2s infinite alternate;
+  cursor: pointer;
+  z-index: 30;
+}
+
+@keyframes capture-pulse {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(220, 30, 30, 0.8)) brightness(0.95);
+  }
+  100% {
+    filter: drop-shadow(0 0 16px rgba(255, 60, 60, 1)) brightness(1.25);
+  }
+}
+
 /* Capture Shatter / Fracture Animation */
 .piece.captured-shatter {
   animation: piece-shatter 0.65s cubic-bezier(0.1, 0.8, 0.35, 1) forwards;

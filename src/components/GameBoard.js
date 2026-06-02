@@ -388,6 +388,28 @@ export default function GameBoard({
             
             const inMill = checkMill(board, occupant || 3 - currentPlayer, idx);
             
+            // Check if this piece is eligible for capture
+            const isCaptureTarget = pendingRemove && isMyTurn() && occupant === (3 - currentPlayer);
+            let isSelectableCapture = false;
+            if (isCaptureTarget) {
+              const targetInMill = checkMill(board, 3 - currentPlayer, idx);
+              if (!targetInMill) {
+                isSelectableCapture = true;
+              } else {
+                // If it is in a mill, it can only be captured if all opponent's pieces are in mills
+                const opponentPieces = [];
+                for (let i = 0; i < 24; i++) {
+                  if (board[i] === (3 - currentPlayer)) {
+                    opponentPieces.push(i);
+                  }
+                }
+                const allOpponentPiecesInMills = opponentPieces.every(p => checkMill(board, 3 - currentPlayer, p));
+                if (allOpponentPiecesInMills) {
+                  isSelectableCapture = true;
+                }
+              }
+            }
+            
             let pieceClass = isPebble ? "piece pebble" : "piece stick";
             
             const shapeIdx = idx % 4;
@@ -395,6 +417,7 @@ export default function GameBoard({
             
             if (isSelected && !isCurrentlyDragged) pieceClass += " active-selected";
             if (inMill && !isShattered) pieceClass += " mill-glow";
+            if (isSelectableCapture && !isShattered) pieceClass += " capture-glow";
             if (isShattered) pieceClass += " captured-shatter";
 
             // Visual dragging offset transform inline
