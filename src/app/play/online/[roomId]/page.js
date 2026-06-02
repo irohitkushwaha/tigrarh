@@ -359,16 +359,85 @@ function OnlinePlayContent({ params }) {
           isOnline={true}
         />
 
-        {/* Top: Opponent Card */}
-        <PlayerDetailsBar
-          name={isMeHost ? player2Name : player1Name}
-          isTurn={isMeHost ? (gameState.currentPlayer === 2) : (gameState.currentPlayer === 1)}
-          piecesToPlaceCount={isMeHost ? gameState.piecesToPlace[2] : gameState.piecesToPlace[1]}
-          piecesActiveCount={isMeHost ? gameState.piecesActive[2] : gameState.piecesActive[1]}
-          capturedCount={isMeHost ? captured2 : captured1}
-          icon={isMeHost ? "🪵" : "⚪"}
-          isMe={false}
-        />
+        {/* Top: Opponent Card or Lobby Invite Panel */}
+        {isMeHost && (!room || !room.guest) ? (
+          <div className="horizontal-player-card" style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "16px 24px",
+            background: "rgba(32, 15, 5, 0.65)",
+            border: "1.5px dashed rgba(228, 114, 52, 0.45)",
+            boxShadow: "0 0 15px rgba(228, 114, 52, 0.15)"
+          }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <span className="flicker-turn-text" style={{ fontSize: "1rem", color: "var(--color-gold)", animation: "turn-text-blink 1.5s infinite alternate" }}>
+                ⏳ Waiting for the guest to join...
+              </span>
+              <span style={{ fontSize: "0.85rem", opacity: 0.75 }}>
+                Share the code or link with a friend to start.
+              </span>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <span style={{
+                fontFamily: "var(--font-cinzel)",
+                fontSize: "1.1rem",
+                color: "#ffcb74",
+                fontWeight: "bold",
+                letterSpacing: "0.1em",
+                background: "rgba(0, 0, 0, 0.3)",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                border: "1px solid rgba(228, 114, 52, 0.2)"
+              }}>
+                Code: {roomId}
+              </span>
+              <button
+                className="action-btn secondary-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(roomId);
+                  alert("Room code copied!");
+                }}
+                style={{ padding: "8px 12px", fontSize: "0.82rem", borderRadius: "6px" }}
+              >
+                📋 Copy Code
+              </button>
+              <button
+                className="action-btn"
+                onClick={() => {
+                  const shareUrl = `${window.location.origin}/play/online/${roomId}`;
+                  if (navigator.share) {
+                    navigator.share({
+                      title: "Tigarh Match Invite",
+                      text: "Join my Nine Men's Morris (Tigarh) game room!",
+                      url: shareUrl
+                    }).catch(() => {
+                      navigator.clipboard.writeText(shareUrl);
+                      alert("Join link copied to clipboard!");
+                    });
+                  } else {
+                    navigator.clipboard.writeText(shareUrl);
+                    alert("Join link copied to clipboard!");
+                  }
+                }}
+                style={{ padding: "8px 12px", fontSize: "0.82rem", borderRadius: "6px" }}
+              >
+                🔗 Share Link
+              </button>
+            </div>
+          </div>
+        ) : (
+          <PlayerDetailsBar
+            name={isMeHost ? player2Name : player1Name}
+            isTurn={isMeHost ? (gameState.currentPlayer === 2) : (gameState.currentPlayer === 1)}
+            piecesToPlaceCount={isMeHost ? gameState.piecesToPlace[2] : gameState.piecesToPlace[1]}
+            piecesActiveCount={isMeHost ? gameState.piecesActive[2] : gameState.piecesActive[1]}
+            capturedCount={isMeHost ? captured2 : captured1}
+            icon={isMeHost ? "🪵" : "⚪"}
+            isMe={false}
+          />
+        )}
 
         {/* Central Game Board */}
         <GameBoard

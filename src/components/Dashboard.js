@@ -70,7 +70,7 @@ export function GameControlsHeader({
     alert("Shareable join link copied to clipboard!");
   };
 
-  const showInviteBox = isOnline && roomId && (!room || !room.guest || room.status === "waiting");
+  const showInviteBox = false;
 
   return (
     <>
